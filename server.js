@@ -157,17 +157,17 @@ if (fs.existsSync(publicScramPath)) {
 }
 
 // Start server - SIMPLIFIED VERSION
-app.listen(PORT, () => {
-  console.log(`
+// Bind to 0.0.0.0 to allow external connections
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`
   🚀 Scramjet Proxy Server
   ========================
+  📍 Host: 0.0.0.0
   📍 Port: ${PORT}
   🌐 Environment: ${process.env.NODE_ENV || 'development'}
   🚂 Railway: ${process.env.RAILWAY_ENVIRONMENT ? 'Yes' : 'No'}
   📁 Directory: ${__dirname}
   
-  ✅ Server is running!
-  
-  Health check: http://localhost:${PORT}/health
-  `);
+  ✅ Server is running and reachable!
+    `);
 });
