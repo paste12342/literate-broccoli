@@ -2,13 +2,15 @@
   "name": "scramjet-proxy",
   "version": "1.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "chmod +x install-scramjet.sh && ./install-scramjet.sh"
   },
   "dependencies": {
     "@mercuryworkshop/scramjet": "2.0.0-alpha",
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
   },
   "engines": {
     "node": ">=18.0.0"
