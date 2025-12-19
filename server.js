@@ -120,6 +120,42 @@ app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'index.html'));
 });
 
+// Fallback Scramjet route if npm install fails
+const publicScramPath = join(__dirname, 'public/scram');
+if (fs.existsSync(publicScramPath)) {
+  console.log('📁 Using fallback Scramjet from /public/scram');
+  app.use('/scram', express.static(publicScramPath));
+} else {
+  // Create minimal fallback
+  app.get('/scram/scramjet.all.js', (req, res) => {
+    res.type('application/javascript');
+    res.send(`
+      console.log('Scramjet fallback loaded');
+      window.$scramjetLoadController = () => ({ 
+        ScramjetController: class { 
+          constructor() {} 
+          async init() { 
+            console.log('Fallback Scramjet initialized');
+            return Promise.resolve();
+          } 
+        } 
+      });
+      window.$scramjetLoadWorker = () => ({ 
+        ScramjetServiceWorker: class { 
+          constructor() {} 
+          async loadConfig() { return Promise.resolve(); } 
+          route() { return false; } 
+          fetch(e) { return fetch(e.request); } 
+        } 
+      });
+    `);
+  });
+  
+  app.get('/scram/:file', (req, res) => {
+    res.send('');
+  });
+}
+
 // Start server - SIMPLIFIED VERSION
 app.listen(PORT, () => {
   console.log(`
