@@ -2,11 +2,26 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pnpm install"
+    "buildCommand": "pnpm install",
+    "nixpacksPlan": {
+      "phases": {
+        "setup": {
+          "aptPackages": ["curl", "git"]
+        },
+        "install": {
+          "cmds": [
+            "npm install -g pnpm",
+            "pnpm install"
+          ]
+        }
+      }
+    }
   },
   "deploy": {
-    "startCommand": "node server.js",
+    "numReplicas": 1,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 3,
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 30
   }
 }
