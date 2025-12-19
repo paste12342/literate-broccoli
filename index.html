@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scramjet Proxy Browser</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .status-bar {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+        }
+        
+        .status-indicator.active {
+            background: #2ed573;
+            animation: pulse 2s infinite;
+        }
+        
+        .url-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input[type="url"] {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+        
+        input[type="url"]:focus {
+            outline: 2px solid #00dbde;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #00dbde, #fc00ff);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .browser-frame {
+            width: 100%;
+            height: 600px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .controls button {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+        
+        .instructions h2 {
+            margin-bottom: 20px;
+            color: #00dbde;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #00dbde;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5em; }
+            .browser-frame { height: 400px; }
+            .url-bar { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>🚀 Scramjet Proxy</h1>
+            <p class="subtitle">A full-featured web proxy powered by Scramjet technology</p>
+            
+            <div class="status-bar" id="statusBar">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Initializing Scramjet...</span>
+            </div>
+        </header>
+        
+        <main>
+            <div class="url-bar">
+                <input type="url" id="urlInput" 
+                       placeholder="https://example.com" 
+                       value="https://wikipedia.org">
+                <button onclick="navigate()">Go</button>
+            </div>
+            
+            <div class="browser-frame">
+                <iframe id="browserFrame" 
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                        allow="accelerometer; camera; geolocation; gyroscope; microphone">
+                </iframe>
+            </div>
+            
+            <div class="controls">
+                <button onclick="goBack()">← Back</button>
+                <button onclick="goForward()">Forward →</button>
+                <button onclick="reload()">↻ Reload</button>
+                <button onclick="home()">🏠 Home</button>
+            </div>
+            
+            <div class="instructions">
+                <h2>📖 Quick Setup Guide</h2>
+                <ol>
+                    <li><strong>Install dependencies:</strong> <code>npm install</code></li>
+                    <li><strong>Install Scramjet:</strong> <code>pnpm i @mercuryworkshop/scramjet@2.0.0-alpha</code></li>
+                    <li><strong>Start server:</strong> <code>npm start</code></li>
+                    <li><strong>Open browser:</strong> Go to <code>http://localhost:3000</code></li>
+                    <li><strong>Enter URL:</strong> Type any website address and press Go!</li>
+                </ol>
+                <p><strong>Note:</strong> Make sure you have Node.js and pnpm installed on your system.</p>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/scram/scramjet.all.js"></script>
+    <script src="main.js"></script>
+    
+    <script>
+        const loading = document.getElementById('loading');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const urlInput = document.getElementById('urlInput');
+        const browserFrame = document.getElementById('browserFrame');
+        
+        // Show loading screen
+        function showLoading(message) {
+            loading.classList.add('active');
+            statusText.textContent = message;
+        }
+        
+        // Hide loading screen
+        function hideLoading() {
+            loading.classList.remove('active');
+            statusIndicator.classList.add('active');
+        }
+        
+        // Navigation functions
+        function navigate() {
+            let url = urlInput.value.trim();
+            if (!url) return;
+            
+            // Add https:// if no protocol specified
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+                urlInput.value = url;
+            }
+            
+            // Use proxy route for the iframe
+            browserFrame.src = `/proxy/${encodeURIComponent(url)}`;
+            showLoading('Loading page via Scramjet...');
+        }
+        
+        function goBack() {
+            try { browserFrame.contentWindow.history.back(); } catch(e) {}
+        }
+        
+        function goForward() {
+            try { browserFrame.contentWindow.history.forward(); } catch(e) {}
+        }
+        
+        function reload() {
+            browserFrame.src = browserFrame.src;
+            showLoading('Reloading page...');
+        }
+        
+        function home() {
+            urlInput.value = 'https://wikipedia.org';
+            navigate();
+        }
+        
+        // When iframe loads
+        browserFrame.onload = () => {
+            hideLoading();
+            statusText.textContent = 'Ready - Scramjet Proxy Active';
+        };
+        
+        // Enter key to navigate
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') navigate();
+        });
+        
+        // Initial load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                hideLoading();
+                navigate(); // Auto-navigate to Wikipedia
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
