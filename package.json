@@ -1,18 +1,31 @@
 {
-  "name": "scramjet-proxy",
+  "name": "scramjet-proxy-railway",
   "version": "1.0.0",
+  "description": "Full web proxy using Scramjet technology",
   "type": "module",
-  "private": true,
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "chmod +x install-scramjet.sh && ./install-scramjet.sh"
+    "postinstall": "chmod +x install-scramjet.sh && ./install-scramjet.sh",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "@mercuryworkshop/scramjet": "2.0.0-alpha",
-    "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "keywords": ["proxy", "scramjet", "web-browser", "railway"],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paste12342/literate-broccoli.git"
   }
 }
